@@ -4,4 +4,5 @@
 /.prettierignore
 /.env
 /node_modules
+/uploads
 dist
