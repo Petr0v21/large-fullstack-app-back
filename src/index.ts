@@ -19,10 +19,6 @@ app.use("/api/auth", auth);
 app.use("/api/post", post);
 app.use("/api/user", user);
 
-app.get("/", (req, res) => {
-  res.end("<h1>Server Running!</h1>");
-});
-
 async function start() {
   try {
     await mongoose.connect(
