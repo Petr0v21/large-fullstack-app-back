@@ -4,11 +4,9 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "node": "node dist/index.js",
-    "build": "tsc",
-    "start:ts": "tsc -w",
-    "start:js": "nodemon dist/index.js",
-    "start": "concurrently npm:start:*"
+    "postinstall": "tsc",
+    "start": "node dist/index.js",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "",

@@ -28,6 +28,10 @@ app.use("/api/auth", auth);
 app.use("/api/post", post);
 app.use("/api/user", user);
 
+// "start:ts": "tsc -w",
+//     "start:js": "nodemon dist/index.js",
+//     "start": "concurrently npm:start:*"
+
 async function start() {
   try {
     await mongoose.connect(
