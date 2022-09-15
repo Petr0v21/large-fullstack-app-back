@@ -6,7 +6,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 const corsOptions = {
@@ -18,6 +18,10 @@ app.use(cors(corsOptions));
 app.use("/api/auth", auth);
 app.use("/api/post", post);
 app.use("/api/user", user);
+
+app.get("/", (req, res) => {
+  res.end("<h1>Server Running!</h1>");
+});
 
 async function start() {
   try {
