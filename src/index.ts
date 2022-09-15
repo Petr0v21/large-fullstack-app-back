@@ -4,10 +4,16 @@ import post from "./routes/post.router";
 import user from "./routes/user.routes";
 import cors from "cors";
 import mongoose from "mongoose";
+import favicon from "express-favicon";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.use(
+  favicon(
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/2300px-React-icon.svg.png"
+  )
+);
 app.use(express.json());
 const corsOptions = {
   origin: "*",
