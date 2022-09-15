@@ -10,8 +10,8 @@ import {
 import fs from "fs";
 dotenv.config();
 
-const accessKeyId = process.env.AWS_ACCESS_KEY;
-const secretAccessKey = process.env.AWS_SECRET_KEY;
+const accessKeyId = process.env.LOCAL_AWS_ACCESS_KEY;
+const secretAccessKey = process.env.LOCAL_AWS_SECRET_KEY;
 const region = process.env.AWS_BUCKET_REGION;
 const bucketName = process.env.AWS_BUCKET_NAME;
 
