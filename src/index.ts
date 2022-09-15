@@ -8,7 +8,7 @@ import mongoose from "mongoose";
 import favicon from "serve-favicon";
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 1011;
 const fav = __dirname.split("/");
 fav.pop();
 const father = fav.join("/");
