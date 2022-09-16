@@ -73,7 +73,6 @@ router.post("/list", async (req: any, res) => {
       let user = await User.findById(post.owner);
       post.ownerName = user.name;
     }
-    console.log(list[0].owner);
     res.send({ list: list, pages: amount });
   } catch (error) {
     throw error;
