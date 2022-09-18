@@ -258,13 +258,15 @@ router.post("/getcomment", async (req: any, res: any) => {
         skip: (req.body.page - 1) * 5,
       }
     );
-    const lengthListPages = Math.ceil((await Post.count(req.body.filter)) / 5);
-    const amount = [];
-    for (let i = 1; i <= lengthListPages; i++) {
-      amount.push(i);
-    }
+    // const lengthListPages = Math.ceil((await Post.count(req.body.filter)) / 5);
+    // const amount = [];
+    // for (let i = 1; i <= lengthListPages; i++) {
+    //   amount.push(i);
+    // }
+    console.log(list);
+    return res.send(list);
     // res.send({ list: list, pages: amount });
-    return res.status(201).json({ message: "коментарий создан" });
+    // return res.status(201).json({ message: "коментарий создан" });
   } catch (e) {
     throw e;
   }
