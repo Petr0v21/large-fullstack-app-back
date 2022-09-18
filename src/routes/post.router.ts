@@ -162,7 +162,6 @@ router.get("/:id", async (req: any, res: any) => {
     const post = await Post.findById(req.params.id).select({
       __v: 0,
       _id: 0,
-      links: 0,
     });
     for (let i = 0; i < post.images.length; i++) {
       post.url[i] = await getObjectSignedUrl(post.images[i]);
