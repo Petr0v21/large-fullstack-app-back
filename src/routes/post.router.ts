@@ -79,6 +79,20 @@ router.post("/list", async (req: any, res) => {
   }
 });
 
+router.post("/ownerposts", async (req: any, res: any) => {
+  try {
+    const user = await User.findById(req.body.user);
+    const posts = [];
+    for (let i = 0; i < user.links.length; i++) {
+      const post = await Post.findById(user.links[i]);
+      posts.push(post);
+    }
+    return res.send(posts);
+  } catch (e) {
+    throw e;
+  }
+});
+
 router.post("/listselected", async (req: any, res) => {
   try {
     const list = await Post.find(
