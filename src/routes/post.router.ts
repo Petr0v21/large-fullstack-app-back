@@ -246,9 +246,10 @@ router.get("/comment/:id", async (req: any, res: any) => {
 
 router.post("/getcomment", async (req: any, res: any) => {
   try {
+    console.log(req.body.ids);
     const list = await Comment.find(
       {
-        owner: { $in: req.body.ids },
+        _id: { $in: req.body.ids },
         ...req.body.filter,
       },
       { __v: 0 },
@@ -262,7 +263,7 @@ router.post("/getcomment", async (req: any, res: any) => {
     for (let i = 1; i <= lengthListPages; i++) {
       amount.push(i);
     }
-    res.send({ list: list, pages: amount });
+    // res.send({ list: list, pages: amount });
     return res.status(201).json({ message: "коментарий создан" });
   } catch (e) {
     throw e;
