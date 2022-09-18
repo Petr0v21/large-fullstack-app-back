@@ -222,11 +222,33 @@ router.post(
   }
 );
 
+router.get("/comment/:id", async (req: any, res: any) => {
+  try {
+    console.log(req.params.id);
+    const list = await Comment.find(
+      { owner: req.params.id },
+      {},
+      {
+        limit: 5,
+        skip: (req.body.page - 1) * 5,
+      }
+    );
+    const lengthListPages = Math.ceil((await Post.count(req.body.filter)) / 5);
+    const amount = [];
+    for (let i = 1; i <= lengthListPages; i++) {
+      amount.push(i);
+    }
+    return res.send({ list: list, pages: amount });
+  } catch (e) {
+    throw e;
+  }
+});
+
 router.post("/getcomment", async (req: any, res: any) => {
   try {
     const list = await Comment.find(
       {
-        _id: { $in: req.body.ids },
+        owner: { $in: req.body.ids },
         ...req.body.filter,
       },
       { __v: 0 },
