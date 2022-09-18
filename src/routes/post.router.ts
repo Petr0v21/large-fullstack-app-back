@@ -81,6 +81,7 @@ router.post("/list", async (req: any, res) => {
 
 router.post("/ownerposts", async (req: any, res: any) => {
   try {
+    console.log(req.body);
     const user = await User.findById(req.body.user);
     const posts = [];
     for (let i = 0; i < user.links.length; i++) {
