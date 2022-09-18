@@ -38,7 +38,7 @@ router.post("/onePost", authMiddleware, async (req: any, res: any) => {
   }
 });
 
-router.get("/posts", authMiddleware, async (req: any, res: any) => {
+router.get("/posts", async (req: any, res: any) => {
   try {
     const user = await User.findById(req.user);
     const posts = [];
