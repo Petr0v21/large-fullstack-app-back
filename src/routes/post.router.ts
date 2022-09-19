@@ -247,17 +247,9 @@ router.get("/comment/:id", async (req: any, res: any) => {
 router.post("/getcomment", async (req: any, res: any) => {
   try {
     console.log(req.body.ids);
-    const list = await Comment.find(
-      {
-        _id: { $in: req.body.ids },
-        ...req.body.filter,
-      },
-      { __v: 0 },
-      {
-        limit: 5,
-        skip: (req.body.page - 1) * 5,
-      }
-    );
+    const list = await Comment.find({
+      _id: { $in: req.body.ids },
+    });
     // const lengthListPages = Math.ceil((await Post.count(req.body.filter)) / 5);
     // const amount = [];
     // for (let i = 1; i <= lengthListPages; i++) {
