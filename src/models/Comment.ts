@@ -5,6 +5,7 @@ const CommentSchema: Schema = new Schema({
   email: { type: String, required: true },
   name: { type: String, required: true },
   rating: { type: Number, required: true, default: "0" },
+  likes: { type: Number, required: true, default: "0" },
   text: { type: String, required: true },
 });
 

@@ -222,23 +222,13 @@ router.post(
   }
 );
 
-router.get("/comment/:id", async (req: any, res: any) => {
+router.post("/comment/like", async (req: any, res: any) => {
   try {
-    console.log(req.params.id);
-    const list = await Comment.find(
-      { owner: req.params.id },
-      {},
-      {
-        limit: 5,
-        skip: (req.body.page - 1) * 5,
-      }
-    );
-    const lengthListPages = Math.ceil((await Post.count(req.body.filter)) / 5);
-    const amount = [];
-    for (let i = 1; i <= lengthListPages; i++) {
-      amount.push(i);
-    }
-    return res.send({ list: list, pages: amount });
+    const { id } = req.body;
+    const comment = await Comment.findById(id);
+    comment.likes = req.body.likes;
+    comment.save();
+    return res.status(201).json({ message: "коментарий updated" });
   } catch (e) {
     throw e;
   }
@@ -250,15 +240,8 @@ router.post("/getcomment", async (req: any, res: any) => {
     const list = await Comment.find({
       _id: { $in: req.body.ids },
     });
-    // const lengthListPages = Math.ceil((await Post.count(req.body.filter)) / 5);
-    // const amount = [];
-    // for (let i = 1; i <= lengthListPages; i++) {
-    //   amount.push(i);
-    // }
     console.log(list);
     return res.send(list);
-    // res.send({ list: list, pages: amount });
-    // return res.status(201).json({ message: "коментарий создан" });
   } catch (e) {
     throw e;
   }
