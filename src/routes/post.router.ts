@@ -3,7 +3,7 @@ import User from "../models/User";
 import * as dotenv from "dotenv";
 import Post from "../models/Post";
 import middleWare from "../middleware/auth.middleware";
-import { getObjectSignedUrl, uploadFileS3 } from "../modules/s3";
+import { deleteFile, getObjectSignedUrl, uploadFileS3 } from "../modules/s3";
 import multer from "multer";
 import { promisify } from "util";
 import { unlink } from "fs";
@@ -62,11 +62,6 @@ router.post("/list", async (req: any, res) => {
     for (let i = 1; i <= lengthListPages; i++) {
       amount.push(i);
     }
-    for (let post of list) {
-      for (let i = 0; i < post.images.length; i++) {
-        post.url[i] = await getObjectSignedUrl(post.images[i]);
-      }
-    }
     let owner = [];
     let user: any;
     for (let post of list) {
@@ -103,20 +98,6 @@ router.post("/listselected", async (req: any, res) => {
       },
       { __v: 0 }
     );
-    // {
-    //   limit: 5,
-    //   skip: (req.body.page - 1) * 5,
-    // }
-    // const lengthListPages = Math.ceil((await Post.count(req.body.filter)) / 5);
-    // const amount = [];
-    // for (let i = 1; i <= lengthListPages; i++) {
-    //   amount.push(i);
-    // }
-    // for (let post of list) {
-    //   for (let i = 0; i < post.images.length; i++) {
-    //     post.url[i] = await getObjectSignedUrl(post.images[i]);
-    //   }
-    // }
     res.send({ list: list });
   } catch (error) {
     throw error;
@@ -129,7 +110,10 @@ router.post("/delete", middleWare, async (req: any, res) => {
     user.links = user.links.filter(
       (idPost) => idPost.toString() !== req.body.id
     );
-    const result = await Post.findByIdAndDelete(req.body.id);
+    const post = await Post.findById(req.body.id);
+    post.images.map((name) => deleteFile(name));
+    post.links.map(async (id) => await Comment.findByIdAndDelete(id));
+    await Post.findByIdAndDelete(req.body.id);
     user.save();
     res.json({ message: "Post has been deleted" });
   } catch (error) {
@@ -150,11 +134,13 @@ router.post(
       }
       const post = await Post.findById(id);
       if (Array.isArray(images)) {
-        images.map((img) => {
+        images.map(async (img) => {
           post.images = post.images.filter((elem) => elem !== img);
+          await deleteFile(img);
         });
       } else if (images) {
         post.images = post.images.filter((elem) => elem !== images);
+        await deleteFile(images);
       }
       if (files) {
         for (let file of files) {

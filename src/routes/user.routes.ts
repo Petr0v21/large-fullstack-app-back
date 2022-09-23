@@ -3,7 +3,7 @@ import User from "../models/User";
 import * as dotenv from "dotenv";
 import authMiddleware from "../middleware/auth.middleware";
 import Post from "../models/Post";
-import { getObjectSignedUrl, uploadFileS3 } from "../modules/s3";
+import { deleteFile, getObjectSignedUrl, uploadFileS3 } from "../modules/s3";
 import multer from "multer";
 import { promisify } from "util";
 import { unlink } from "fs";
@@ -24,6 +24,7 @@ router.get("/info", authMiddleware, async (req: any, res: any) => {
       links: 0,
       password: 0,
     });
+    if (user.image != "") user.url = await getObjectSignedUrl(user.image);
     return res.json(user);
   } catch (e) {
     throw e;
@@ -74,13 +75,15 @@ router.post(
       }
       const user = await User.findById(req.user);
       if (req.file) {
+        if (user.image != "") {
+          await deleteFile(user.image);
+        }
         const imageName = generateFileName();
         const result = await uploadFileS3(req.file, imageName);
         await unlinkFile(req.file.path);
         user.image = imageName;
       }
       user.save();
-      // const user = await User.findByIdAndUpdate(req.user, { ...req.body });
       return res.send({ message: "User has been updated" });
     } catch (e) {
       throw e;

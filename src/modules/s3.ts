@@ -53,18 +53,14 @@ export async function getObjectSignedUrl(key: string) {
   return url;
 }
 
-// uploads a file to s3
-// const uploadFile = (file: any) => {
-//   const fileStream = fs.createReadStream(file.path);
+export function deleteFile(fileName) {
+  const deleteParams = {
+    Bucket: bucketName,
+    Key: fileName,
+  };
 
-//   const uploadParams = {
-//     Bucket: bucketName,
-//     Body: fileStream,
-//     Key: file.filename,
-//     ContentType: file.mimetype,
-//   };
-//   return s3.upload(uploadParams).promise();
-// };
+  return s3Client.send(new DeleteObjectCommand(deleteParams));
+}
 
 // downloads a file from s3
 
