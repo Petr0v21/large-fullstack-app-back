@@ -7,6 +7,8 @@ const UserSchema: Schema = new Schema({
   name: { type: String, required: true },
   age: { type: String, default: "" },
   addInf: { type: String, default: "" },
+  image: { type: String, required: true },
+  url: { type: String, required: true },
   links: [{ type: Types.ObjectId, ref: "Link" }],
 });
 

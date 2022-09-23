@@ -101,23 +101,23 @@ router.post("/listselected", async (req: any, res) => {
         _id: { $in: req.body.ids },
         ...req.body.filter,
       },
-      { __v: 0 },
-      {
-        limit: 5,
-        skip: (req.body.page - 1) * 5,
-      }
+      { __v: 0 }
     );
-    const lengthListPages = Math.ceil((await Post.count(req.body.filter)) / 5);
-    const amount = [];
-    for (let i = 1; i <= lengthListPages; i++) {
-      amount.push(i);
-    }
-    for (let post of list) {
-      for (let i = 0; i < post.images.length; i++) {
-        post.url[i] = await getObjectSignedUrl(post.images[i]);
-      }
-    }
-    res.send({ list: list, pages: amount });
+    // {
+    //   limit: 5,
+    //   skip: (req.body.page - 1) * 5,
+    // }
+    // const lengthListPages = Math.ceil((await Post.count(req.body.filter)) / 5);
+    // const amount = [];
+    // for (let i = 1; i <= lengthListPages; i++) {
+    //   amount.push(i);
+    // }
+    // for (let post of list) {
+    //   for (let i = 0; i < post.images.length; i++) {
+    //     post.url[i] = await getObjectSignedUrl(post.images[i]);
+    //   }
+    // }
+    res.send({ list: list });
   } catch (error) {
     throw error;
   }

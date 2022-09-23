@@ -3,9 +3,18 @@ import User from "../models/User";
 import * as dotenv from "dotenv";
 import authMiddleware from "../middleware/auth.middleware";
 import Post from "../models/Post";
-import { getObjectSignedUrl } from "../modules/s3";
+import { getObjectSignedUrl, uploadFileS3 } from "../modules/s3";
+import multer from "multer";
+import { promisify } from "util";
+import { unlink } from "fs";
+import crypto from "crypto";
+
 dotenv.config();
 const router = Router();
+const unlinkFile = promisify(unlink);
+const upload = multer({ dest: "uploads/" });
+const generateFileName = (bytes = 32) =>
+  crypto.randomBytes(bytes).toString("hex");
 
 router.get("/info", authMiddleware, async (req: any, res: any) => {
   try {
@@ -46,24 +55,37 @@ router.get("/posts", authMiddleware, async (req: any, res: any) => {
       const post = await Post.findById(user.links[i]);
       posts.push(post);
     }
-    for (let post of posts) {
-      for (let i = 0; i < post.images.length; i++) {
-        post.url[i] = await getObjectSignedUrl(post.images[i]);
-      }
-    }
     return res.send(posts);
   } catch (e) {
     throw e;
   }
 });
 
-router.post("/updateUser", authMiddleware, async (req: any, res: any) => {
-  try {
-    const user = await User.findByIdAndUpdate(req.user, { ...req.body });
-    return res.send({ message: "User has been updated" });
-  } catch (e) {
-    throw e;
+router.post(
+  "/updateUser",
+  authMiddleware,
+  upload.single("image"),
+  async (req: any, res: any) => {
+    try {
+      console.log(req.file);
+      console.log(req.body);
+      if (req.body) {
+        await User.findByIdAndUpdate(req.user, { ...req.body });
+      }
+      const user = await User.findById(req.user);
+      if (req.file) {
+        const imageName = generateFileName();
+        const result = await uploadFileS3(req.file, imageName);
+        await unlinkFile(req.file.path);
+        user.image = imageName;
+      }
+      user.save();
+      // const user = await User.findByIdAndUpdate(req.user, { ...req.body });
+      return res.send({ message: "User has been updated" });
+    } catch (e) {
+      throw e;
+    }
   }
-});
+);
 
 export default router;
