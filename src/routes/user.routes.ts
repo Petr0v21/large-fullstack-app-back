@@ -68,8 +68,6 @@ router.post(
   upload.single("image"),
   async (req: any, res: any) => {
     try {
-      console.log(req.file);
-      console.log(req.body);
       if (req.body) {
         await User.findByIdAndUpdate(req.user, { ...req.body });
       }

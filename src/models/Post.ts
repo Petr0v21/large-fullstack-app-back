@@ -8,7 +8,10 @@ const PostSchema: Schema = new Schema({
     average: { type: Number, default: "0", required: true },
     amount: { type: Number, default: 0, required: true },
   },
-  price: { type: String },
+  price: {
+    amount: { type: Number, default: "0", required: true },
+    value: { type: String, required: true },
+  },
   description: { type: String, required: true },
   category: { type: String, required: true },
   location: { type: String, required: true },

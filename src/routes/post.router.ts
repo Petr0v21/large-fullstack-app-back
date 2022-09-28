@@ -25,9 +25,14 @@ router.post(
     try {
       const files = req.files;
       const father = await User.findById(req.user);
+      const { priceAmount, priceValue, ...body } = req.body;
       if (!father) return res.status(400).json({ message: "User not exist" });
       const post = new Post({
-        ...req.body,
+        ...body,
+        price: {
+          amount: priceAmount,
+          value: priceValue,
+        },
         owner: req.user,
         ownerName: father.name,
       });
@@ -47,23 +52,96 @@ router.post(
   }
 );
 
+router.get("/search/:title", async (req: any, res: any) => {
+  try {
+    const poststitle = await Post.find(
+      { title: { $regex: `${req.params.title}`, $options: "i" } },
+      { title: 1 },
+      { limit: 10 }
+    );
+    res.send(poststitle);
+  } catch (e) {
+    throw e;
+  }
+});
+
 router.post("/list", async (req: any, res) => {
   try {
-    const list = await Post.find(
-      req.body.filter,
-      { __v: 0 },
-      {
+    let lengthListPages;
+    let list;
+    if (req.body.filter) {
+      const { title, price, location, order } = req.body.filter;
+      let filterprice: any;
+      let sortOrder = {};
+      switch (order) {
+        case "Від меншої ціни":
+          sortOrder = { "price.amount": 1 };
+          break;
+        case "Від найбільшої ціни":
+          sortOrder = { "price.amount": -1 };
+          break;
+        case "По даті":
+          sortOrder = { _id: -1 };
+          break;
+        default:
+          sortOrder = { "rating.average": 1 };
+      }
+      switch (price) {
+        case "До 100грн":
+          filterprice = { $lte: 100 };
+          break;
+        case "Від 100грн":
+          filterprice = { $gte: 100 };
+          break;
+        default:
+          filterprice = { $gte: 0 };
+      }
+      let filterObj = {};
+      Object.entries(req.body.filter).map((val) => {
+        switch (val[0]) {
+          case "title":
+            filterObj = {
+              ...filterObj,
+              title: { $regex: `${title}`, $options: "i" },
+            };
+            break;
+          case "location":
+            filterObj = {
+              ...filterObj,
+              location: { $regex: `${location}`, $options: "i" },
+            };
+            break;
+          case "category":
+            filterObj = { ...filterObj, category: val[1] };
+            break;
+          case "price":
+            filterObj = { ...filterObj, "price.amount": filterprice };
+            break;
+          default:
+        }
+      });
+      list = await Post.find(
+        filterObj,
+        { __v: 0 },
+        {
+          sort: sortOrder,
+          limit: 5,
+          skip: (req.body.page - 1) * 5,
+        }
+      );
+      lengthListPages = Math.ceil((await Post.count(filterObj)) / 5);
+    } else {
+      list = await Post.find({
+        sort: { "rating.average": -1 },
         limit: 5,
         skip: (req.body.page - 1) * 5,
-      }
-    );
-    const lengthListPages = Math.ceil((await Post.count(req.body.filter)) / 5);
+      });
+      lengthListPages = Math.ceil((await Post.count()) / 5);
+    }
     const amount = [];
     for (let i = 1; i <= lengthListPages; i++) {
       amount.push(i);
     }
-    let owner = [];
-    let user: any;
     for (let post of list) {
       let user = await User.findById(post.owner);
       post.ownerName = user.name;
@@ -76,7 +154,6 @@ router.post("/list", async (req: any, res) => {
 
 router.post("/ownerposts", async (req: any, res: any) => {
   try {
-    console.log(req.body);
     const user = await User.findById(req.body.user);
     const posts = [];
     for (let i = 0; i < user.links.length; i++) {
@@ -94,7 +171,6 @@ router.post("/listselected", async (req: any, res) => {
     const list = await Post.find(
       {
         _id: { $in: req.body.ids },
-        ...req.body.filter,
       },
       { __v: 0 }
     );
@@ -128,9 +204,18 @@ router.post(
   async (req: any, res) => {
     try {
       const files = req.files;
-      const { id, images, rating, ...body } = req.body;
+      const { id, images, rating, priceAmount, priceValue, ...body } = req.body;
+      let priceObj = {
+        amount: priceAmount,
+        value: priceValue,
+      };
       if (body) {
         await Post.findByIdAndUpdate(id, body);
+      }
+      if (Object.values(priceObj).find((arg) => arg !== "")) {
+        await Post.findByIdAndUpdate(id, {
+          price: priceObj,
+        });
       }
       const post = await Post.findById(id);
       if (Array.isArray(images)) {
@@ -162,7 +247,6 @@ router.get("/:id", async (req: any, res: any) => {
   try {
     const post = await Post.findById(req.params.id).select({
       __v: 0,
-      _id: 0,
     });
     for (let i = 0; i < post.images.length; i++) {
       post.url[i] = await getObjectSignedUrl(post.images[i]);
@@ -222,11 +306,9 @@ router.post("/comment/like", async (req: any, res: any) => {
 
 router.post("/getcomment", async (req: any, res: any) => {
   try {
-    console.log(req.body.ids);
     const list = await Comment.find({
       _id: { $in: req.body.ids },
     });
-    console.log(list);
     return res.send(list);
   } catch (e) {
     throw e;
