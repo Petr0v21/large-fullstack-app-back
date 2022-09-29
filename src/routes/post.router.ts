@@ -131,11 +131,15 @@ router.post("/list", async (req: any, res) => {
       );
       lengthListPages = Math.ceil((await Post.count(filterObj)) / 5);
     } else {
-      list = await Post.find({
-        sort: { "rating.average": -1 },
-        limit: 5,
-        skip: (req.body.page - 1) * 5,
-      });
+      list = await Post.find(
+        {},
+        {},
+        {
+          sort: { "rating.average": -1 },
+          limit: 5,
+          skip: (req.body.page - 1) * 5,
+        }
+      );
       lengthListPages = Math.ceil((await Post.count()) / 5);
     }
     const amount = [];
