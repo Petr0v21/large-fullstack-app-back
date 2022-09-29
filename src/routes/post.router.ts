@@ -69,6 +69,7 @@ router.post("/list", async (req: any, res) => {
   try {
     let lengthListPages;
     let list;
+    let countNum;
     if (req.body.filter) {
       const { title, price, location, order } = req.body.filter;
       let filterprice: any;
@@ -129,7 +130,8 @@ router.post("/list", async (req: any, res) => {
           skip: (req.body.page - 1) * 5,
         }
       );
-      lengthListPages = Math.ceil((await Post.count(filterObj)) / 5);
+      countNum = await Post.count(filterObj);
+      lengthListPages = Math.ceil(countNum / 5);
     } else {
       list = await Post.find(
         {},
@@ -140,7 +142,8 @@ router.post("/list", async (req: any, res) => {
           skip: (req.body.page - 1) * 5,
         }
       );
-      lengthListPages = Math.ceil((await Post.count()) / 5);
+      countNum = await Post.count();
+      lengthListPages = Math.ceil(countNum / 5);
     }
     const amount = [];
     for (let i = 1; i <= lengthListPages; i++) {
@@ -150,7 +153,7 @@ router.post("/list", async (req: any, res) => {
       let user = await User.findById(post.owner);
       post.ownerName = user.name;
     }
-    res.send({ list: list, pages: amount });
+    res.send({ list: list, pages: amount, count: countNum });
   } catch (error) {
     throw error;
   }
